@@ -25,6 +25,14 @@ from .fields import (
 from .search import Search
 from .signals import post_index
 
+
+#ForContent
+from django.db.models import Q
+
+from PyPDF2 import PdfFileReader
+
+import re
+
 model_field_class_to_field_class = {
     models.AutoField: IntegerField,
     models.BigAutoField: LongField,
@@ -79,7 +87,8 @@ class DocType(DSLDocument):
         """
         Return the queryset that should be indexed by this doc type.
         """
-        return self.django.model._default_manager.all()
+        #Eliminar filtro para indexar todos los portales
+        return self.django.model._default_manager.all().filter(Q(idportal = 10) | Q(idportal = 465) | Q(idportal = 386))
 
     def get_indexing_queryset(self):
         """
@@ -129,6 +138,33 @@ class DocType(DSLDocument):
             name: prep_func(instance)
             for name, field, prep_func in self._prepared_fields
         }
+        #Dinamic Routes for PDF CONTENT
+        #response = FileResponse(open(f'./static/archivos/{portal.nombre}/{section.ruta}/{archivo.ano}/{archivo.nombre}', 'rb'))
+        try:
+            idarchivo = data["idarchivo"]
+            nombre = data["nombre"]
+            ano = data["ano"]
+            nombreportal = data["idportal"]["nombre"] 
+            rutaseccion = data["idmenu"]["ruta"]
+
+            print(f"Indexando contenido del archivo {idarchivo} - {nombre}")
+
+            pdfFileObject = open(f'./static/archivos/{nombreportal}/{rutaseccion}/{ano}/{nombre}', 'rb')
+            pdfReader = PdfFileReader(pdfFileObject)
+
+            text=''
+
+            for i in range(0,pdfReader.numPages):
+                # creating a page object
+                pageObj = pdfReader.getPage(i)
+                # extracting text from page
+                text=text+pageObj.extractText()
+
+            data["contenido"] = re.sub(r"[^a-zA-Z0-9]","",text.replace(" ","").rstrip())[0:1000]
+        except:
+            data["contenido"] = None
+        print(data["contenido"])
+
         return data
 
     @classmethod
