@@ -160,7 +160,7 @@ class DocType(DSLDocument):
                 # extracting text from page
                 text=text+pageObj.extractText()
 
-            data["contenido"] = re.sub(r"[^a-zA-Z0-9]","",text.replace(" ","").rstrip())[0:1000]
+            data["contenido"] = (re.sub(r"[^a-zA-Z0-9]","",text.replace(" ","").rstrip())[0:1000]).lower()
         except:
             data["contenido"] = None
         print(data["contenido"])
