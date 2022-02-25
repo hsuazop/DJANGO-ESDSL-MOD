@@ -163,8 +163,8 @@ class DocType(DSLDocument):
             data["contenido"] = (re.sub(r"[^a-zA-Z0-9]","",text.replace(" ","").rstrip())[0:1000]).lower()
         except:
             data["contenido"] = None
-        print(data["contenido"])
 
+        data["nombremuestra"] = (data["nombremuestra"]).capitalize()
         return data
 
     @classmethod
