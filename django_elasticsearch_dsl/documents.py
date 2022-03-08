@@ -9,8 +9,6 @@ from elasticsearch.helpers import bulk, parallel_bulk
 from elasticsearch_dsl import Document as DSLDocument
 from six import iteritems
 
-import os
-
 from .exceptions import ModelFieldNotMappedError
 from .fields import (
     BooleanField,
@@ -90,7 +88,7 @@ class DocType(DSLDocument):
         Return the queryset that should be indexed by this doc type.
         """
         #Eliminar filtro para indexar todos los portales
-        return self.django.model._default_manager.all().filter()
+        return self.django.model._default_manager.all().filter(Q(idportal = 10) | Q(idportal = 465) | Q(idportal = 386))
 
     def get_indexing_queryset(self):
         """
@@ -150,9 +148,8 @@ class DocType(DSLDocument):
             rutaseccion = data["idmenu"]["ruta"]
 
             print(f"Indexando contenido del archivo {idarchivo} - {nombre}")
-            media = os.environ.get('media')
 
-            pdfFileObject = open(f'{media}{nombreportal}/{rutaseccion}/{ano}/{nombre}', 'rb')
+            pdfFileObject = open(f'./static/archivos/{nombreportal}/{rutaseccion}/{ano}/{nombre}', 'rb')
             pdfReader = PdfFileReader(pdfFileObject)
 
             text=''
