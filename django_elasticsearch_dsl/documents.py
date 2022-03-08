@@ -25,6 +25,7 @@ from .fields import (
 from .search import Search
 from .signals import post_index
 
+import os
 
 #ForContent
 from django.db.models import Q
@@ -88,7 +89,7 @@ class DocType(DSLDocument):
         Return the queryset that should be indexed by this doc type.
         """
         #Eliminar filtro para indexar todos los portales
-        return self.django.model._default_manager.all().filter(Q(idportal = 10) | Q(idportal = 465) | Q(idportal = 386))
+        return self.django.model._default_manager.all().filter()
 
     def get_indexing_queryset(self):
         """
@@ -149,7 +150,9 @@ class DocType(DSLDocument):
 
             print(f"Indexando contenido del archivo {idarchivo} - {nombre}")
 
-            pdfFileObject = open(f'./static/archivos/{nombreportal}/{rutaseccion}/{ano}/{nombre}', 'rb')
+            media = os.environ.get('media')
+
+            pdfFileObject = open(f'{media}{nombreportal}/{rutaseccion}/{ano}/{nombre}', 'rb')
             pdfReader = PdfFileReader(pdfFileObject)
 
             text=''
