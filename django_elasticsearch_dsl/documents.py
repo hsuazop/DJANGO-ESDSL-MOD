@@ -153,21 +153,27 @@ class DocType(DSLDocument):
             media = os.environ.get('media')
 
             pdfFileObject = open(f'{media}{nombreportal}/{rutaseccion}/{ano}/{nombre}', 'rb')
-            pdfReader = PdfFileReader(pdfFileObject)
 
-            text=''
+            try:
+                pdfReader = PdfFileReader(pdfFileObject)
+                text=''
+                if(pdfReader.numPages and PdfFileReader.numPages > 0):
+                    for i in range(0,pdfReader.numPages):
+                        # creating a page object
+                        pageObj = pdfReader.getPage(i)
+                        # extracting text from page
+                        text=text+pageObj.extractText()
+                    data["contenido"] = (re.sub(r"[^a-zA-Z0-9]","",text.replace(" ","").rstrip())[0:1000]).lower()
+            except:
+                data["contenido"] = ""
 
-            for i in range(0,pdfReader.numPages):
-                # creating a page object
-                pageObj = pdfReader.getPage(i)
-                # extracting text from page
-                text=text+pageObj.extractText()
 
-            data["contenido"] = (re.sub(r"[^a-zA-Z0-9]","",text.replace(" ","").rstrip())[0:1000]).lower()
         except:
             data["contenido"] = None
+        
+        if(data["nombremuestra"]):
+            data["nombremuestra"] = (data["nombremuestra"]).capitalize()
 
-        data["nombremuestra"] = (data["nombremuestra"]).capitalize()
         return data
 
     @classmethod
